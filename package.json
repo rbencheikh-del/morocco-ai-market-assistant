@@ -1,0 +1,29 @@
+{
+  "name": "morocco-ai-market-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Full-stack analytics-only MVP for an AI-powered Moroccan stock market assistant.",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:web": "node scripts/workspace-run.mjs apps/web dev",
+    "build:web": "node scripts/workspace-run.mjs apps/web build",
+    "dev:api": "uvicorn app.main:app --reload --app-dir apps/api",
+    "compose:up": "docker compose up --build",
+    "compose:down": "docker compose down",
+    "legacy:dev": "vite --host 127.0.0.1",
+    "legacy:build": "vite build",
+    "legacy:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.468.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.8.0",
+    "vite": "^7.0.0"
+  }
+}
