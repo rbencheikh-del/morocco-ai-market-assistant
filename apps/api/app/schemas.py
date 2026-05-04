@@ -209,10 +209,31 @@ class PortfolioRiskAlertOut(ApiModel):
 
 
 class WatchlistItemOut(ApiModel):
+    id: UUID | None = None
     ticker: str
     user_note: str | None = None
     alert_above_mad: float | None = None
     alert_below_mad: float | None = None
+
+
+class CreateWatchlistRequest(ApiModel):
+    name: str = Field(min_length=1, max_length=120)
+    description: str | None = Field(default=None, max_length=500)
+    user_id: UUID | None = None
+    is_default: bool = False
+
+
+class AddWatchlistItemRequest(ApiModel):
+    ticker: str = Field(min_length=2, max_length=8)
+    user_note: str | None = Field(default=None, max_length=500)
+    alert_above_mad: float | None = Field(default=None, ge=0)
+    alert_below_mad: float | None = Field(default=None, ge=0)
+
+
+class UpdateWatchlistItemRequest(ApiModel):
+    user_note: str | None = Field(default=None, max_length=500)
+    alert_above_mad: float | None = Field(default=None, ge=0)
+    alert_below_mad: float | None = Field(default=None, ge=0)
 
 
 class WatchlistOut(ApiModel):
@@ -221,6 +242,15 @@ class WatchlistOut(ApiModel):
     description: str | None = None
     is_default: bool
     items: list[WatchlistItemOut]
+
+
+class UserAlertOut(ApiModel):
+    alert_type: str
+    severity: str = Field(pattern="^(Low|Medium|High)$")
+    symbol: str | None = None
+    message: str
+    recommended_action: str
+    current_price_mad: float | None = None
 
 
 class AskRequest(ApiModel):

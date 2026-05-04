@@ -165,6 +165,29 @@ Data quality rules flag:
 
 Known limitations: this MVP does not yet connect to an official CSE data provider, reconcile corporate actions, backfill holidays, or authenticate admin endpoints. Before production, admin routes need authentication, source allowlisting, provider-specific adapters, and an operations runbook.
 
+## Watchlists And User Alerts
+
+Users can create watchlists, add Casablanca-listed equities, attach notes, and set MAD price alert levels. Alerts are analytics-only review prompts, not trade instructions.
+
+Watchlist endpoints:
+
+- `GET /watchlists`
+- `POST /watchlists`
+- `GET /watchlists/{id}`
+- `POST /watchlists/{id}/items`
+- `PUT /watchlists/{id}/items/{item_id}`
+- `DELETE /watchlists/{id}/items/{item_id}`
+- `GET /watchlists/{id}/alerts`
+
+Supported watchlist alerts:
+
+- Price above user-defined MAD threshold
+- Price below user-defined MAD threshold
+- Missing latest market price
+- SELL / AVOID research signal on a watched stock
+
+Each alert returns `alert_type`, `severity`, `symbol`, `message`, `recommended_action`, and `current_price_mad`. Production readiness still requires user authentication, ownership checks, notification delivery preferences, alert de-duplication, and audit logging.
+
 ## Ranking and Signal Logic
 
 The backend uses a transparent, rules-based ranking engine for Casablanca Stock Exchange equities. It does not use black-box AI and does not execute trades.
