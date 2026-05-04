@@ -12,7 +12,6 @@ function formatMad(value: number) {
 export function DashboardSummary({ data }: { data: DashboardData }) {
   const buySignals = data.rankings.filter((stock) => stock.signal === "BUY").length;
   const highRiskStocks = data.rankings.filter((stock) => stock.risk_score >= 65).length;
-  const totalPl = data.portfolio.holdings.reduce((sum, holding) => sum + holding.unrealized_pl_mad, 0);
 
   return (
     <section className="summaryGrid" aria-label="Dashboard summary">
@@ -34,7 +33,9 @@ export function DashboardSummary({ data }: { data: DashboardData }) {
       <article>
         <WalletCards size={20} />
         <span>Portfolio P&L</span>
-        <strong className={totalPl >= 0 ? "positive" : "negative"}>{formatMad(totalPl)}</strong>
+        <strong className={data.portfolio.unrealized_pl_mad >= 0 ? "positive" : "negative"}>
+          {formatMad(data.portfolio.unrealized_pl_mad)}
+        </strong>
       </article>
     </section>
   );

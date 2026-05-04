@@ -102,6 +102,7 @@ python -m pytest
 Run the frontend and prototype checks:
 
 ```bash
+npm run test:web
 npm run build:web
 npm run legacy:check
 ```
@@ -117,7 +118,14 @@ Current verification for the portfolio tracker and risk alert engine:
 
 - Backend unit tests: `17 passed`
 - Next.js production build: passed
+- Frontend dashboard tests: passed
 - Legacy TypeScript check: passed
+
+## Frontend Dashboard
+
+The Next.js dashboard connects to the FastAPI analytics endpoints and falls back to local mock data when the API is unavailable. The main page shows ranked Moroccan equities with research signal, confidence, risk level, latest MAD price, and 1M / 3M momentum. Stock detail pages are available at `/stocks/{symbol}` and show company profile, sector, latest price, ranking score, signal explanation, technical indicators, and risk warnings.
+
+The portfolio section uses the portfolio summary and risk alert endpoints to show current MAD value, unrealized P&L, stock allocation, sector allocation, and active risk alerts. Every dashboard surface keeps the MVP disclaimer visible: `This is market analytics only, not financial advice.`
 
 ## Ranking and Signal Logic
 

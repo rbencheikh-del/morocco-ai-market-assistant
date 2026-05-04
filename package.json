@@ -9,6 +9,7 @@
   "scripts": {
     "dev:web": "node scripts/workspace-run.mjs apps/web dev",
     "build:web": "node scripts/workspace-run.mjs apps/web build",
+    "test:web": "node apps/web/tests/dashboard.test.mjs",
     "dev:api": "uvicorn app.main:app --reload --app-dir apps/api",
     "compose:up": "docker compose up --build",
     "compose:down": "docker compose down",

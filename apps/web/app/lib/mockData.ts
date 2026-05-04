@@ -17,6 +17,9 @@ export const mockDashboardData: DashboardData = {
       confidence: 76,
       reason: "Quality and liquidity are strong, but sector exposure is already meaningful.",
       risk_note: "Watch banking concentration.",
+      latest_price_mad: 480,
+      momentum_1m: 0.028,
+      momentum_3m: 0.072,
     },
     {
       ticker: "IAM",
@@ -33,6 +36,9 @@ export const mockDashboardData: DashboardData = {
       confidence: 73,
       reason: "Defensive dividend profile fits balanced manual portfolios.",
       risk_note: "Confirm latest source timestamp before relying on signal.",
+      latest_price_mad: 91,
+      momentum_1m: 0.012,
+      momentum_3m: 0.031,
     },
     {
       ticker: "LHM",
@@ -49,6 +55,9 @@ export const mockDashboardData: DashboardData = {
       confidence: 69,
       reason: "Manual portfolio concentration is high relative to the risk profile.",
       risk_note: "Review single-name exposure.",
+      latest_price_mad: 1780,
+      momentum_1m: 0.034,
+      momentum_3m: 0.085,
     },
   ],
   signals: [
@@ -88,10 +97,19 @@ export const mockDashboardData: DashboardData = {
     { ticker: "BOA", as_of: "2026-05-03T10:00:00Z", price_mad: 185, volume: 84000, momentum_90d: 0.066 },
   ],
   portfolio: {
-    id: "demo",
-    name: "Demo Manual Portfolio",
+    portfolio_id: "demo",
+    portfolio_name: "Demo Manual Portfolio",
     base_currency: "MAD",
-    total_value_mad: 145870,
+    cost_basis_mad: 141_320,
+    current_value_mad: 145870,
+    unrealized_pl_mad: 4550,
+    unrealized_pl_pct: 3.22,
+    sector_allocations: {
+      Banking: 31.2,
+      Telecom: 15.6,
+      Materials: 36.6,
+    },
+    data_quality_warnings: [],
     holdings: [
       { ticker: "ATW", quantity: 60, average_cost_mad: 462, current_price_mad: 480, market_value_mad: 28800, unrealized_pl_mad: 1080, allocation_pct: 19.74, manual_note: "Core banking position" },
       { ticker: "IAM", quantity: 250, average_cost_mad: 91, current_price_mad: 91, market_value_mad: 22750, unrealized_pl_mad: 0, allocation_pct: 15.60, manual_note: "Defensive dividend exposure" },
@@ -99,7 +117,7 @@ export const mockDashboardData: DashboardData = {
     ],
   },
   alerts: [
-    { id: "1", severity: "high", title: "Single-stock concentration", detail: "LHM represents a large share of the manual portfolio.", ticker: "LHM", created_at: "2026-05-03T10:00:00Z" },
-    { id: "2", severity: "medium", title: "Banking sector exposure", detail: "ATW and BOA together create meaningful banking-sector concentration.", created_at: "2026-05-03T10:00:00Z" },
+    { id: "1", severity: "High", alert_type: "single_stock_exposure", message: "LHM represents a large share of the manual portfolio.", symbol: "LHM", recommended_action: "Review position size and diversification. This app does not execute trades." },
+    { id: "2", severity: "Medium", alert_type: "sector_exposure", message: "Banking exposure is above the review threshold.", recommended_action: "Review whether sector concentration matches the portfolio objective." },
   ],
 };

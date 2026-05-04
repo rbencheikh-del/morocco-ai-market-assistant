@@ -2,6 +2,24 @@ import type { RankedStock } from "../lib/types";
 import { RiskLevelBadge } from "./RiskLevelBadge";
 import { SignalBadge } from "./SignalBadge";
 
+function formatMad(value?: number) {
+  if (value === undefined) {
+    return "No price";
+  }
+  return new Intl.NumberFormat("en-MA", {
+    style: "currency",
+    currency: "MAD",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatMomentum(value?: number) {
+  if (value === undefined) {
+    return "n/a";
+  }
+  return `${(value * 100).toFixed(1)}%`;
+}
+
 export function RankedStocksTable({ rankings }: { rankings: RankedStock[] }) {
   return (
     <article className="panel tablePanel">
@@ -23,6 +41,8 @@ export function RankedStocksTable({ rankings }: { rankings: RankedStock[] }) {
               <th>Signal</th>
               <th>Confidence</th>
               <th>Risk level</th>
+              <th>Latest price</th>
+              <th>1M / 3M momentum</th>
               <th>Why</th>
             </tr>
           </thead>
@@ -31,7 +51,9 @@ export function RankedStocksTable({ rankings }: { rankings: RankedStock[] }) {
               <tr key={stock.ticker}>
                 <td>#{stock.rank_position}</td>
                 <td>
-                  <strong>{stock.ticker}</strong>
+                  <a className="stockLink" href={`/stocks/${stock.ticker}`}>
+                    <strong>{stock.ticker}</strong>
+                  </a>
                   <span>{stock.name}</span>
                 </td>
                 <td>{stock.sector}</td>
@@ -49,6 +71,11 @@ export function RankedStocksTable({ rankings }: { rankings: RankedStock[] }) {
                 <td>
                   <RiskLevelBadge riskScore={stock.risk_score} />
                   <span>Score {stock.risk_score}</span>
+                </td>
+                <td>{formatMad(stock.latest_price_mad)}</td>
+                <td>
+                  <strong>{formatMomentum(stock.momentum_1m)}</strong>
+                  <span>{formatMomentum(stock.momentum_3m)} 3M</span>
                 </td>
                 <td>{stock.rationale}</td>
               </tr>

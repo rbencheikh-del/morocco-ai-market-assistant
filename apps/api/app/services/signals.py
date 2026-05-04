@@ -9,6 +9,15 @@ def list_signals(db: Session) -> list[StockSignal]:
     return db.query(StockSignal).order_by(StockSignal.signal_date.desc(), StockSignal.ticker.asc()).all()
 
 
+def get_latest_signal(db: Session, ticker: str) -> StockSignal | None:
+    return (
+        db.query(StockSignal)
+        .filter(StockSignal.ticker == ticker.upper())
+        .order_by(StockSignal.signal_date.desc())
+        .first()
+    )
+
+
 def generate_signal(features: dict) -> dict:
     signal, confidence = classify_signal(features)
     rules_result = generate_rules_based_signal(

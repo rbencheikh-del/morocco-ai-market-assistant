@@ -45,6 +45,11 @@ export default async function DashboardPage() {
           </div>
         </header>
 
+        <section className="disclaimerPanel" role="note">
+          <ShieldCheck size={18} />
+          <strong>This is market analytics only, not financial advice.</strong>
+        </section>
+
         <DashboardSummary data={data} />
 
         <section id="rankings">
