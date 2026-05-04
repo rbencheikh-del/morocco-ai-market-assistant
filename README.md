@@ -99,6 +99,26 @@ Run backend unit tests:
 python -m pytest
 ```
 
+Run the frontend and prototype checks:
+
+```bash
+npm run build:web
+npm run legacy:check
+```
+
+On Windows, if the Next.js build reports a process-spawn permission error, run the build through Node directly from the web workspace:
+
+```powershell
+cd apps\web
+& "C:\Program Files\nodejs\node.exe" ..\..\node_modules\next\dist\bin\next build
+```
+
+Current verification for the portfolio tracker and risk alert engine:
+
+- Backend unit tests: `17 passed`
+- Next.js production build: passed
+- Legacy TypeScript check: passed
+
 ## Ranking and Signal Logic
 
 The backend uses a transparent, rules-based ranking engine for Casablanca Stock Exchange equities. It does not use black-box AI and does not execute trades.
