@@ -133,7 +133,7 @@ def test_missing_indicator_data_fails_safely_without_buy():
     assert result["ranking_score"] == 0
     assert result["signal"] == "SELL"
     assert "ma_20" in result["missing_data"]
-    assert "missing or invalid" in result["explanation"]
+    assert "Required market data is missing or invalid" in result["explanation"]
 
 
 def test_technical_indicators_are_calculated_from_daily_prices():
@@ -170,11 +170,34 @@ def test_multilingual_explanations_are_clear_actionable_and_not_advice():
         }
     )
 
-    assert "Research signal: Positive" in explanation["en"]
-    assert "Next step:" in explanation["en"]
+    assert "BUY (74% confidence)" in explanation["en"]
+    assert "Why:" in explanation["en"]
+    assert "- Strong 3M momentum" in explanation["en"]
+    assert "Risks:" in explanation["en"]
+    assert "Action:" in explanation["en"]
     assert "not financial advice" in explanation["en"]
-    assert "Signal de recherche" in explanation["fr"]
-    assert "Prochaine étape" in explanation["fr"]
-    assert "إشارة بحثية" in explanation["ar"]
-    assert "الخطوة التالية" in explanation["ar"]
-    assert "Ø" not in explanation["ar"]
+    assert "Pourquoi:" in explanation["fr"]
+    assert "Risques:" in explanation["fr"]
+    assert "\u0627\u0644\u0633\u0628\u0628:" in explanation["ar"]
+    assert "\u0627\u0644\u0645\u062e\u0627\u0637\u0631:" in explanation["ar"]
+    assert "\u00d8" not in explanation["ar"]
+
+
+def test_rules_signal_explanation_uses_scannable_sections():
+    result = generate_rules_based_signal(
+        {
+            "ma_20": 110,
+            "ma_50": 100,
+            "rsi": 58,
+            "volatility_30d": 0.10,
+            "avg_daily_traded_value_mad": 18_000_000,
+            "momentum_1m": 0.06,
+            "momentum_3m": 0.12,
+        }
+    )
+
+    assert result["explanation"].startswith("BUY (")
+    assert "Why:" in result["explanation"]
+    assert "Risks:" in result["explanation"]
+    assert "Action:" in result["explanation"]
+    assert "Market analytics only, not financial advice." in result["explanation"]

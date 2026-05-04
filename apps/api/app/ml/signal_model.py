@@ -202,17 +202,42 @@ def _plain_english_explanation(
     liquidity_note = "liquidity is acceptable" if liquidity_acceptable else "liquidity is weak"
     if missing_data:
         return (
-            f"{lead} because required market data is missing or invalid: {', '.join(missing_data)}. "
-            "It fails safely as SELL/AVOID for research purposes only; this is not a trade instruction."
+            f"{signal} ({confidence}% confidence)\n\n"
+            "Why:\n"
+            "- Required market data is missing or invalid\n\n"
+            "Risks:\n"
+            f"- Missing fields: {', '.join(missing_data)}\n\n"
+            "Action:\n"
+            "Refresh or verify market data before relying on this research signal.\n\n"
+            "Market analytics only, not financial advice."
         )
+    why = bullish_reasons[:3] if signal == "BUY" else (caution_reasons[:2] or bearish_reasons[:2])
+    if signal == "SELL":
+        why = bearish_reasons[:3] or caution_reasons[:2]
+    risks = (caution_reasons + bearish_reasons)[:3] if signal != "SELL" else bearish_reasons[:3]
+    if not risks:
+        risks = [f"{risk_level} risk profile", liquidity_note]
+    action = {
+        "BUY": "Watch for confirmation above the next resistance level or a fresh price breakout.",
+        "HOLD": "Keep monitoring price, liquidity, and the next signal update.",
+        "SELL": "Review risk drivers and data freshness before making any manual decision.",
+    }[signal]
+    why_text = "\n".join(f"- {item}" for item in (why or [details or "Indicators are mixed"]))
+    risk_text = "\n".join(f"- {item}" for item in risks)
     if details:
         return (
-            f"{lead} with {confidence}% confidence, a {ranking_score}/100 ranking score, and {risk_level} risk "
-            f"because {details}; {liquidity_note}. This is research support only, not a trade instruction."
+            f"{signal} ({confidence}% confidence)\n\n"
+            f"Why:\n{why_text}\n\n"
+            f"Risks:\n{risk_text}\n\n"
+            f"Action:\n{action}\n\n"
+            "Market analytics only, not financial advice."
         )
     return (
-        f"{lead} with {confidence}% confidence, a {ranking_score}/100 ranking score, and {risk_level} risk "
-        f"based on the supplied market indicators; {liquidity_note}. This is research support only, not a trade instruction."
+        f"{signal} ({confidence}% confidence)\n\n"
+        f"Why:\n- Ranking score is {ranking_score}/100\n- {liquidity_note}\n\n"
+        f"Risks:\n- {risk_level} risk profile\n\n"
+        f"Action:\n{action}\n\n"
+        "Market analytics only, not financial advice."
     )
 
 
