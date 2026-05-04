@@ -127,6 +127,44 @@ The Next.js dashboard connects to the FastAPI analytics endpoints and falls back
 
 The portfolio section uses the portfolio summary and risk alert endpoints to show current MAD value, unrealized P&L, stock allocation, sector allocation, and active risk alerts. Every dashboard surface keeps the MVP disclaimer visible: `This is market analytics only, not financial advice.`
 
+## Market Data Ingestion
+
+Daily Casablanca Stock Exchange prices can be imported through the admin CSV endpoint:
+
+```bash
+curl -X POST http://127.0.0.1:8000/admin/import-prices \
+  -H "Content-Type: text/csv" \
+  --data-binary @prices.csv
+```
+
+Required CSV columns:
+
+```csv
+symbol,date,open,high,low,close,volume
+ATW,2026-05-01,480,486,476,482,145000
+IAM,2026-05-01,91,92,90,91,220000
+```
+
+Optional columns are `adjusted_close`, `traded_value`, and `market_cap`. Dates must use ISO format: `YYYY-MM-DD`. Prices are MAD-denominated. The importer validates symbols against active listed securities, rejects invalid rows safely, skips duplicate symbol/date records, and stores clean rows in `daily_ohlcv_prices`.
+
+Admin market-data endpoints:
+
+- `POST /admin/import-prices`: import CSV daily OHLCV data from the request body.
+- `GET /admin/import-status`: view the latest import or refresh job status.
+- `GET /admin/data-quality-report`: inspect quality issues across stored prices.
+- `POST /admin/daily-refresh`: manually trigger the scheduled refresh structure.
+
+Data quality rules flag:
+
+- Missing close price
+- Negative prices
+- Zero volume
+- Duplicate symbol/date records
+- Stale prices older than 7 days
+- Large unexplained close-to-close moves above 15%
+
+Known limitations: this MVP does not yet connect to an official CSE data provider, reconcile corporate actions, backfill holidays, or authenticate admin endpoints. Before production, admin routes need authentication, source allowlisting, provider-specific adapters, and an operations runbook.
+
 ## Ranking and Signal Logic
 
 The backend uses a transparent, rules-based ranking engine for Casablanca Stock Exchange equities. It does not use black-box AI and does not execute trades.

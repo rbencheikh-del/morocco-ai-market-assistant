@@ -240,3 +240,45 @@ class AskResponse(ApiModel):
 class IngestionResult(ApiModel):
     inserted: int
     mode: str
+
+
+class PriceImportOut(ApiModel):
+    status: str
+    batch_id: str
+    rows_received: int
+    rows_inserted: int
+    rows_rejected: int
+    rows_duplicate: int
+    warning_count: int
+    warnings: list[dict] = Field(default_factory=list)
+    rejected_rows: list[dict] = Field(default_factory=list)
+
+
+class ImportStatusOut(ApiModel):
+    status: str
+    message: str | None = None
+    id: UUID | None = None
+    source_name: str | None = None
+    rows_received: int | None = None
+    rows_inserted: int | None = None
+    rows_rejected: int | None = None
+    rows_duplicate: int | None = None
+    warning_count: int | None = None
+    error_message: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+
+
+class DataQualityReportOut(ApiModel):
+    as_of: date
+    rows_checked: int
+    issue_count: int
+    issues: list[dict] = Field(default_factory=list)
+    rules: dict
+    latest_import_rejections: list[dict] = Field(default_factory=list)
+
+
+class DailyRefreshOut(ApiModel):
+    status: str
+    message: str
+    warning_count: int = 0

@@ -61,6 +61,23 @@ class DailyOHLCVPrice(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class MarketDataImportLog(Base):
+    __tablename__ = "market_data_import_logs"
+
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, server_default=text("uuid_generate_v4()"))
+    source_name: Mapped[str] = mapped_column(String, server_default="csv_upload")
+    status: Mapped[str] = mapped_column(String)
+    rows_received: Mapped[int] = mapped_column(Integer, server_default="0")
+    rows_inserted: Mapped[int] = mapped_column(Integer, server_default="0")
+    rows_rejected: Mapped[int] = mapped_column(Integer, server_default="0")
+    rows_duplicate: Mapped[int] = mapped_column(Integer, server_default="0")
+    warning_count: Mapped[int] = mapped_column(Integer, server_default="0")
+    error_message: Mapped[str | None] = mapped_column(Text)
+    import_summary: Mapped[dict] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class MarketSnapshot(Base):
     __tablename__ = "market_snapshots"
 

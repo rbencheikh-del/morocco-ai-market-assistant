@@ -51,6 +51,21 @@ CREATE TABLE IF NOT EXISTS daily_ohlcv_prices (
   CHECK (low_mad <= open_mad AND low_mad <= close_mad)
 );
 
+CREATE TABLE IF NOT EXISTS market_data_import_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source_name TEXT NOT NULL DEFAULT 'csv_upload',
+  status TEXT NOT NULL CHECK (status IN ('success', 'partial_success', 'failed')),
+  rows_received INTEGER NOT NULL DEFAULT 0,
+  rows_inserted INTEGER NOT NULL DEFAULT 0,
+  rows_rejected INTEGER NOT NULL DEFAULT 0,
+  rows_duplicate INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  error_message TEXT,
+  import_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS market_snapshots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ticker TEXT NOT NULL REFERENCES securities(ticker) ON UPDATE CASCADE,
@@ -191,6 +206,7 @@ CREATE TABLE IF NOT EXISTS model_audit_logs (
 CREATE INDEX IF NOT EXISTS idx_securities_exchange_sector ON securities(exchange_code, sector, is_active);
 CREATE INDEX IF NOT EXISTS idx_daily_ohlcv_ticker_date ON daily_ohlcv_prices(ticker, price_date DESC);
 CREATE INDEX IF NOT EXISTS idx_daily_ohlcv_security_date ON daily_ohlcv_prices(security_id, price_date DESC);
+CREATE INDEX IF NOT EXISTS idx_import_logs_started ON market_data_import_logs(started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_snapshots_ticker_as_of ON market_snapshots(ticker, as_of DESC);
 CREATE INDEX IF NOT EXISTS idx_rankings_rank_date ON stock_rankings(rank_date, rank_position);
 CREATE INDEX IF NOT EXISTS idx_rankings_ticker_date ON stock_rankings(ticker, rank_date DESC);
