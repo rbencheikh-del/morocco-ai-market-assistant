@@ -97,9 +97,13 @@ class RulesSignalOut(ApiModel):
     signal: str
     confidence: int
     risk_level: str
+    ranking_score: int
+    component_scores: dict[str, int]
+    liquidity_acceptable: bool
+    missing_data: list[str] = Field(default_factory=list)
     explanation: str
     reasons: list[str]
-    model_version: str = "rules-cse-v1"
+    model_version: str = "rules-cse-v2"
 
 
 class SignalExplanationRequest(ApiModel):

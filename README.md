@@ -70,6 +70,36 @@ Run backend unit tests:
 python -m pytest
 ```
 
+## Ranking and Signal Logic
+
+The backend uses a transparent, rules-based ranking engine for Casablanca Stock Exchange equities. It does not use black-box AI and does not execute trades.
+
+Technical inputs:
+
+- 20-day moving average
+- 50-day moving average
+- RSI 14
+- 30-day volatility
+- 1-month momentum
+- 3-month momentum
+- Average daily traded value in MAD
+
+Ranking score, 0-100:
+
+- 30% momentum
+- 20% trend
+- 20% liquidity
+- 15% volatility
+- 15% RSI / technical strength
+
+Signal rules:
+
+- `BUY`: score >= 75 and liquidity is acceptable
+- `HOLD`: score between 50 and 74
+- `SELL`: score < 50 or liquidity is weak
+
+If required indicator data is missing or invalid, the engine fails safely with `SELL` / `AVOID`, a `0` ranking score, and a `missing_data` explanation instead of producing a misleading positive signal.
+
 ## Project Structure
 
 - `apps/web`: Next.js dashboard, stock assistant UI, and charts.

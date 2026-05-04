@@ -12,14 +12,38 @@ The MVP signal engine is deterministic and explainable. It is designed for Casab
 - `momentum_1m`: 1-month momentum as a decimal
 - `momentum_3m`: 3-month momentum as a decimal
 
+## Ranking Score
+
+The score is 0-100 and intentionally explainable:
+
+- 30% momentum
+- 20% trend
+- 20% liquidity
+- 15% volatility
+- 15% RSI / technical strength
+
 ## Output
 
 - `signal`: `BUY`, `HOLD`, or `SELL`
 - `confidence`: 35-92 score
 - `risk_level`: `low`, `medium`, or `high`
+- `ranking_score`: 0-100 weighted score
+- `component_scores`: per-factor score breakdown
+- `liquidity_acceptable`: boolean liquidity gate
+- `missing_data`: required fields that were missing or invalid
 - `explanation`: plain-English explanation
 - `reasons`: individual rule reasons
-- `model_version`: `rules-cse-v1`
+- `model_version`: `rules-cse-v2`
+
+Signal rules:
+
+- `BUY`: score >= 75 and liquidity is acceptable
+- `HOLD`: score between 50 and 74
+- `SELL`: score < 50 or liquidity is weak
+
+Missing-data rule:
+
+- If required indicator data is missing or invalid, the engine fails safely as `SELL` / `AVOID` with score `0` and a clear `missing_data` explanation.
 
 ## API
 

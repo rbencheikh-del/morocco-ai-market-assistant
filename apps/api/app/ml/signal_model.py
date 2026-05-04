@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
+from app.ml.ranking_model import rank_stock
+
 
 SignalLabel = Literal["BUY", "HOLD", "SELL"]
 RiskLevel = Literal["low", "medium", "high"]
@@ -21,6 +23,10 @@ class SignalResult(TypedDict):
     signal: SignalLabel
     confidence: int
     risk_level: RiskLevel
+    ranking_score: int
+    component_scores: dict[str, int]
+    liquidity_acceptable: bool
+    missing_data: list[str]
     explanation: str
     reasons: list[str]
 
@@ -55,6 +61,8 @@ def classify_signal(features: dict) -> tuple[str, int]:
 
 
 def generate_rules_based_signal(inputs: SignalInputs) -> SignalResult:
+    ranking = rank_stock(inputs)
+    ranking_score = ranking["ranking_score"]
     score = 0
     bullish_reasons: list[str] = []
     bearish_reasons: list[str] = []
@@ -124,21 +132,43 @@ def generate_rules_based_signal(inputs: SignalInputs) -> SignalResult:
     else:
         bullish_reasons.append("30-day volatility is contained")
 
-    if score >= 3 and risk_level != "high":
+    if ranking["missing_data"]:
+        signal: SignalLabel = "SELL"
+        bearish_reasons.append(
+            "required market data is missing or invalid, so the engine fails safely with SELL/AVOID"
+        )
+    elif ranking["liquidity_weak"]:
+        signal: SignalLabel = "SELL"
+        bearish_reasons.append("liquidity is weak, so the stock is marked SELL/AVOID for this analytics-only MVP")
+    elif ranking_score >= 75 and ranking["liquidity_acceptable"]:
         signal: SignalLabel = "BUY"
-    elif score <= -3 or (risk_level == "high" and score <= 1):
-        signal = "SELL"
-    else:
+    elif 50 <= ranking_score <= 74:
         signal = "HOLD"
+    else:
+        signal = "SELL"
 
     reasons = bullish_reasons + caution_reasons + bearish_reasons
-    confidence = _confidence(score, risk_level, len(reasons))
-    explanation = _plain_english_explanation(signal, confidence, risk_level, bullish_reasons, caution_reasons, bearish_reasons)
+    confidence = _confidence_from_ranking(signal, ranking_score, risk_level, len(reasons))
+    explanation = _plain_english_explanation(
+        signal,
+        confidence,
+        risk_level,
+        ranking_score,
+        ranking["liquidity_acceptable"],
+        ranking["missing_data"],
+        bullish_reasons,
+        caution_reasons,
+        bearish_reasons,
+    )
 
     return {
         "signal": signal,
         "confidence": confidence,
         "risk_level": risk_level,
+        "ranking_score": ranking_score,
+        "component_scores": ranking["component_scores"],
+        "liquidity_acceptable": ranking["liquidity_acceptable"],
+        "missing_data": ranking["missing_data"],
         "explanation": explanation,
         "reasons": reasons,
     }
@@ -148,11 +178,16 @@ def _plain_english_explanation(
     signal: SignalLabel,
     confidence: int,
     risk_level: RiskLevel,
+    ranking_score: int,
+    liquidity_acceptable: bool,
+    missing_data: list[str],
     bullish_reasons: list[str],
     caution_reasons: list[str],
     bearish_reasons: list[str],
 ) -> str:
-    if signal == "BUY":
+    if missing_data:
+        lead = "The engine cannot calculate a reliable research signal"
+    elif signal == "BUY":
         lead = "The setup is positive enough for a BUY research signal"
     elif signal == "SELL":
         lead = "The setup is weak enough for a SELL research signal"
@@ -164,6 +199,30 @@ def _plain_english_explanation(
         strongest = caution_reasons[:2] or bullish_reasons[:1] or bearish_reasons[:1]
 
     details = "; ".join(strongest)
+    liquidity_note = "liquidity is acceptable" if liquidity_acceptable else "liquidity is weak"
+    if missing_data:
+        return (
+            f"{lead} because required market data is missing or invalid: {', '.join(missing_data)}. "
+            "It fails safely as SELL/AVOID for research purposes only; this is not a trade instruction."
+        )
     if details:
-        return f"{lead} with {confidence}% confidence and {risk_level} risk because {details}."
-    return f"{lead} with {confidence}% confidence and {risk_level} risk based on the supplied market indicators."
+        return (
+            f"{lead} with {confidence}% confidence, a {ranking_score}/100 ranking score, and {risk_level} risk "
+            f"because {details}; {liquidity_note}. This is research support only, not a trade instruction."
+        )
+    return (
+        f"{lead} with {confidence}% confidence, a {ranking_score}/100 ranking score, and {risk_level} risk "
+        f"based on the supplied market indicators; {liquidity_note}. This is research support only, not a trade instruction."
+    )
+
+
+def _confidence_from_ranking(signal: SignalLabel, ranking_score: int, risk_level: RiskLevel, rule_count: int) -> int:
+    if signal == "BUY":
+        distance = ranking_score - 75
+    elif signal == "SELL":
+        distance = 50 - ranking_score
+    else:
+        distance = 74 - abs(62 - ranking_score)
+    risk_penalty = {"low": 0, "medium": 5, "high": 12}[risk_level]
+    evidence_bonus = min(rule_count * 2, 10)
+    return max(40, min(95, round(62 + distance * 0.6 + evidence_bonus - risk_penalty)))

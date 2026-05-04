@@ -27,7 +27,7 @@ def generate_signal(features: dict) -> dict:
         "confidence": confidence,
         "reason": rules_result["explanation"],
         "risk_note": f"Risk level: {rules_result['risk_level']}. Signals are research support only; no trade execution is available.",
-        "model_version": "rules-cse-v1",
+        "model_version": "rules-cse-v2",
     }
 
 
@@ -45,7 +45,7 @@ def generate_rules_signal(features: dict) -> dict:
     )
     return {
         **result,
-        "model_version": "rules-cse-v1",
+        "model_version": "rules-cse-v2",
     }
 
 
