@@ -55,6 +55,18 @@ test("risk alerts display severity, message, and recommended action", () => {
   assert.match(alerts, /recommended_action/);
 });
 
+test("watchlist page and alert bell display user alerting surfaces", () => {
+  const watchlist = read("apps/web/app/components/WatchlistPage.tsx");
+  const bell = read("apps/web/app/components/AlertBellPanel.tsx");
+  const page = read("apps/web/app/page.tsx");
+
+  assert.match(watchlist, /Watchlists/);
+  assert.match(watchlist, /Latest price/);
+  assert.match(watchlist, /Daily change/);
+  assert.match(bell, /unread research alert/);
+  assert.match(page, /AlertBellPanel/);
+});
+
 test("stock detail page shows company profile, indicators, signal explanation, and warnings", () => {
   const detail = read("apps/web/app/components/StockDetailView.tsx");
   const route = read("apps/web/app/stocks/[symbol]/page.tsx");
@@ -74,6 +86,8 @@ test("frontend API client calls the required FastAPI endpoints", () => {
   assert.match(api, /\/signals\/\$\{ticker\}/);
   assert.match(api, /\/portfolios\/\$\{demoPortfolio\.id\}\/summary/);
   assert.match(api, /\/portfolios\/\$\{demoPortfolio\.id\}\/risk-alerts/);
+  assert.match(api, /\/alerts\/unread/);
+  assert.match(api, /\/watchlists/);
 });
 
 console.log("frontend dashboard smoke tests passed");

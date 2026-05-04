@@ -13,6 +13,20 @@ def list_risk_alerts(db: Session) -> list[RiskAlert]:
     return db.query(RiskAlert).order_by(RiskAlert.created_at.desc()).all()
 
 
+def list_unread_alerts(db: Session) -> list[RiskAlert]:
+    return db.query(RiskAlert).filter(RiskAlert.is_read.is_(False)).order_by(RiskAlert.created_at.desc()).all()
+
+
+def mark_alert_read(db: Session, alert_id: UUID) -> RiskAlert | None:
+    alert = db.query(RiskAlert).filter(RiskAlert.id == alert_id).first()
+    if not alert:
+        return None
+    alert.is_read = True
+    db.commit()
+    db.refresh(alert)
+    return alert
+
+
 def _latest_signal(db: Session, ticker: str) -> StockSignal | None:
     return (
         db.query(StockSignal)

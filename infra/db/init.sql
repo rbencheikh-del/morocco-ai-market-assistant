@@ -178,11 +178,29 @@ CREATE TABLE IF NOT EXISTS risk_alerts (
   portfolio_id UUID REFERENCES manual_portfolios(id) ON DELETE CASCADE,
   watchlist_id UUID REFERENCES watchlists(id) ON DELETE CASCADE,
   ticker TEXT REFERENCES securities(ticker) ON UPDATE CASCADE,
-  alert_type TEXT NOT NULL CHECK (alert_type IN ('price', 'signal', 'portfolio_risk', 'concentration', 'volatility', 'data_quality')),
+  alert_type TEXT NOT NULL CHECK (alert_type IN (
+    'price',
+    'signal',
+    'portfolio_risk',
+    'concentration',
+    'volatility',
+    'data_quality',
+    'price_above_threshold',
+    'price_below_threshold',
+    'missing_market_price',
+    'signal_watch',
+    'signal_change',
+    'daily_price_move',
+    'ranking_threshold',
+    'risk_level_increase',
+    'low_liquidity',
+    'high_volatility'
+  )),
   severity TEXT NOT NULL CHECK (severity IN ('low', 'medium', 'high')),
   title TEXT NOT NULL,
   detail TEXT NOT NULL,
   trigger_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
   is_resolved BOOLEAN NOT NULL DEFAULT FALSE,
   resolved_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -218,4 +236,5 @@ CREATE INDEX IF NOT EXISTS idx_watchlists_user ON watchlists(user_id, is_default
 CREATE INDEX IF NOT EXISTS idx_watchlist_items_watchlist ON watchlist_items(watchlist_id, ticker);
 CREATE INDEX IF NOT EXISTS idx_alerts_user_created ON risk_alerts(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_portfolio ON risk_alerts(portfolio_id, severity);
+CREATE INDEX IF NOT EXISTS idx_alerts_unread ON risk_alerts(user_id, is_read, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_user_created ON model_audit_logs(user_id, created_at DESC);

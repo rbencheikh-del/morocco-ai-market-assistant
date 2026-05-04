@@ -189,6 +189,12 @@ class RiskAlertOut(ApiModel):
     detail: str
     ticker: str | None = None
     created_at: datetime
+    is_read: bool = False
+
+
+class AlertReadOut(ApiModel):
+    id: UUID
+    is_read: bool
 
 
 class RiskAlertGenerationRequest(ApiModel):
@@ -216,6 +222,16 @@ class WatchlistItemOut(ApiModel):
     alert_below_mad: float | None = None
 
 
+class WatchlistStockOut(WatchlistItemOut):
+    latest_price_mad: float | None = None
+    signal: str | None = None
+    ranking_score: int | None = None
+    daily_change_pct: float | None = None
+    risk_level: str | None = None
+    liquidity_score: int | None = None
+    volatility_30d: float | None = None
+
+
 class CreateWatchlistRequest(ApiModel):
     name: str = Field(min_length=1, max_length=120)
     description: str | None = Field(default=None, max_length=500)
@@ -236,12 +252,25 @@ class UpdateWatchlistItemRequest(ApiModel):
     alert_below_mad: float | None = Field(default=None, ge=0)
 
 
+class RenameWatchlistRequest(ApiModel):
+    name: str = Field(min_length=1, max_length=120)
+    description: str | None = Field(default=None, max_length=500)
+
+
 class WatchlistOut(ApiModel):
     id: UUID
     name: str
     description: str | None = None
     is_default: bool
     items: list[WatchlistItemOut]
+
+
+class WatchlistDetailOut(ApiModel):
+    id: UUID
+    name: str
+    description: str | None = None
+    is_default: bool
+    items: list[WatchlistStockOut]
 
 
 class UserAlertOut(ApiModel):

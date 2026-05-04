@@ -117,7 +117,23 @@ export const mockDashboardData: DashboardData = {
     ],
   },
   alerts: [
-    { id: "1", severity: "High", alert_type: "single_stock_exposure", message: "LHM represents a large share of the manual portfolio.", symbol: "LHM", recommended_action: "Review position size and diversification. This app does not execute trades." },
-    { id: "2", severity: "Medium", alert_type: "sector_exposure", message: "Banking exposure is above the review threshold.", recommended_action: "Review whether sector concentration matches the portfolio objective." },
+    { id: "1", severity: "High", alert_type: "single_stock_exposure", message: "LHM represents a large share of the manual portfolio.", symbol: "LHM", recommended_action: "Review position size and diversification. This app does not execute trades.", is_read: false },
+    { id: "2", severity: "Medium", alert_type: "sector_exposure", message: "Banking exposure is above the review threshold.", recommended_action: "Review whether sector concentration matches the portfolio objective.", is_read: true },
+  ],
+  unreadAlerts: [
+    { id: "1", severity: "High", alert_type: "single_stock_exposure", message: "LHM represents a large share of the manual portfolio.", symbol: "LHM", recommended_action: "Review position size and diversification. This app does not execute trades.", is_read: false },
+  ],
+  watchlists: [
+    {
+      id: "core",
+      name: "Core Casablanca Watchlist",
+      description: "Tracked Moroccan equities with research-only alerts.",
+      is_default: true,
+      items: [
+        { ticker: "ATW", latest_price_mad: 480, signal: "HOLD", ranking_score: 84, daily_change_pct: 1.2, risk_level: "medium", alert_above_mad: 500 },
+        { ticker: "IAM", latest_price_mad: 91, signal: "BUY", ranking_score: 79, daily_change_pct: -0.4, risk_level: "low", alert_below_mad: 88 },
+        { ticker: "LHM", latest_price_mad: 1780, signal: "SELL", ranking_score: 74, daily_change_pct: -5.8, risk_level: "high" },
+      ],
+    },
   ],
 };

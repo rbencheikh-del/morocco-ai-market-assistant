@@ -174,10 +174,15 @@ Watchlist endpoints:
 - `GET /watchlists`
 - `POST /watchlists`
 - `GET /watchlists/{id}`
+- `PUT /watchlists/{id}`
+- `DELETE /watchlists/{id}`
 - `POST /watchlists/{id}/items`
+- `POST /watchlists/{id}/stocks`
 - `PUT /watchlists/{id}/items/{item_id}`
 - `DELETE /watchlists/{id}/items/{item_id}`
+- `DELETE /watchlists/{id}/stocks/{symbol}`
 - `GET /watchlists/{id}/alerts`
+- `POST /watchlists/{id}/alerts/generate`
 
 Supported watchlist alerts:
 
@@ -185,8 +190,22 @@ Supported watchlist alerts:
 - Price below user-defined MAD threshold
 - Missing latest market price
 - SELL / AVOID research signal on a watched stock
+- Signal changes, such as `HOLD` to `BUY`
+- Daily price moves above +/- 5%
+- Ranking score crossing above 75
+- Risk level increases
+- Low-liquidity score
+- New high-volatility condition
 
 Each alert returns `alert_type`, `severity`, `symbol`, `message`, `recommended_action`, and `current_price_mad`. Production readiness still requires user authentication, ownership checks, notification delivery preferences, alert de-duplication, and audit logging.
+
+Persisted alert endpoints:
+
+- `GET /alerts`
+- `GET /alerts/unread`
+- `PUT /alerts/{id}/read`
+
+The frontend dashboard includes a watchlist table and a top-right-style alert bell panel with unread alert count and a simple alert history preview.
 
 ## Ranking and Signal Logic
 

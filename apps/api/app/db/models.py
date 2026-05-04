@@ -209,6 +209,7 @@ class RiskAlert(Base):
     title: Mapped[str] = mapped_column(String)
     detail: Mapped[str] = mapped_column(Text)
     trigger_payload: Mapped[dict] = mapped_column(JSONB, server_default=text("'{}'::jsonb"))
+    is_read: Mapped[bool] = mapped_column(Boolean, server_default=text("FALSE"))
     is_resolved: Mapped[bool] = mapped_column(Boolean, server_default=text("FALSE"))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

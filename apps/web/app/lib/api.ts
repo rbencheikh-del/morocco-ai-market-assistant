@@ -24,6 +24,13 @@ export async function getDashboardData(): Promise<DashboardData> {
       getJson<PortfolioSummary>(`/portfolios/${demoPortfolio.id}/summary`),
       getJson<DashboardData["alerts"]>(`/portfolios/${demoPortfolio.id}/risk-alerts`),
     ]);
+    const [unreadAlerts, watchlistSummaries] = await Promise.all([
+      getJson<DashboardData["unreadAlerts"]>("/alerts/unread"),
+      getJson<DashboardData["watchlists"]>("/watchlists"),
+    ]);
+    const watchlists = await Promise.all(
+      watchlistSummaries.map((watchlist) => getJson<DashboardData["watchlists"][number]>(`/watchlists/${watchlist.id}`)),
+    );
 
     const enrichedRankings = rankings.map((stock) => {
       const snapshot = snapshots.find((item) => item.ticker === stock.ticker);
@@ -34,7 +41,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         momentum_3m: snapshot?.momentum_90d ?? stock.momentum_3m,
       };
     });
-    return { rankings: enrichedRankings, signals, snapshots, portfolio, alerts };
+    return { rankings: enrichedRankings, signals, snapshots, portfolio, alerts, unreadAlerts, watchlists };
   } catch {
     return mockDashboardData;
   }

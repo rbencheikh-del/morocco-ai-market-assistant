@@ -74,6 +74,28 @@ export type RiskAlert = {
   message?: string;
   recommended_action?: string;
   created_at?: string;
+  is_read?: boolean;
+};
+
+export type WatchlistStock = {
+  id?: string;
+  ticker: string;
+  user_note?: string;
+  alert_above_mad?: number;
+  alert_below_mad?: number;
+  latest_price_mad?: number;
+  signal?: "BUY" | "HOLD" | "SELL";
+  ranking_score?: number;
+  daily_change_pct?: number;
+  risk_level?: string;
+};
+
+export type Watchlist = {
+  id: string;
+  name: string;
+  description?: string;
+  is_default: boolean;
+  items: WatchlistStock[];
 };
 
 export type StockDetail = {
@@ -112,4 +134,6 @@ export type DashboardData = {
   snapshots: MarketSnapshot[];
   portfolio: PortfolioSummary;
   alerts: RiskAlert[];
+  unreadAlerts: RiskAlert[];
+  watchlists: Watchlist[];
 };

@@ -14,9 +14,11 @@ declare module "lucide-react" {
   export const Activity: LucideIcon;
   export const AlertTriangle: LucideIcon;
   export const BarChart3: LucideIcon;
+  export const Bell: LucideIcon;
   export const Bot: LucideIcon;
   export const BrainCircuit: LucideIcon;
   export const Building2: LucideIcon;
+  export const Eye: LucideIcon;
   export const LineChart: LucideIcon;
   export const SendHorizonal: LucideIcon;
   export const ShieldCheck: LucideIcon;
