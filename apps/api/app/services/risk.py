@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 from app.db.models import ManualPortfolio, RiskAlert, StockSignal
 from app.services.portfolio import calculate_portfolio_pnl, get_portfolio
 
+LOW_LIQUIDITY_TRADED_VALUE_MAD = 1_000_000
+HIGH_VOLATILITY_30D = 0.22
+
 
 def list_risk_alerts(db: Session) -> list[RiskAlert]:
     return db.query(RiskAlert).order_by(RiskAlert.created_at.desc()).all()
@@ -19,113 +22,213 @@ def _latest_signal(db: Session, ticker: str) -> StockSignal | None:
     )
 
 
+def _alert(
+    portfolio: ManualPortfolio,
+    ticker: str | None,
+    alert_type: str,
+    severity: str,
+    title: str,
+    detail: str,
+    trigger_payload: dict,
+    recommended_action: str,
+) -> dict:
+    return {
+        "user_id": portfolio.user_id,
+        "portfolio_id": portfolio.id,
+        "ticker": ticker,
+        "alert_type": alert_type,
+        "severity": severity,
+        "title": title,
+        "detail": detail,
+        "trigger_payload": {
+            **trigger_payload,
+            "recommended_action": recommended_action,
+        },
+    }
+
+
 def build_portfolio_risk_alerts(portfolio: ManualPortfolio, pnl: dict, latest_signal_lookup) -> list[dict]:
     alerts: list[dict] = []
 
     for holding in pnl["holdings"]:
         allocation = holding["allocation_pct"]
-        unrealized_pl = holding["unrealized_pl_mad"]
-        market_value = holding["market_value_mad"]
+        unrealized_pl_pct = holding.get("unrealized_pl_pct", 0.0)
+        avg_daily_traded_value_mad = holding.get("avg_daily_traded_value_mad", 0.0)
+        volatility_30d = holding.get("volatility_30d")
 
         if holding.get("price_status") == "missing":
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": holding["ticker"],
-                    "alert_type": "data_quality",
-                    "severity": "medium",
-                    "title": "Missing market price",
-                    "detail": f"{holding['ticker']} is valued using average cost because no latest market price is available.",
-                    "trigger_payload": {"price_status": "missing"},
-                }
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "missing_market_price",
+                    "medium",
+                    "Missing market price",
+                    f"{holding['ticker']} is valued using average cost because no latest market price is available.",
+                    {"price_status": "missing"},
+                    "Refresh or verify market data before relying on this portfolio valuation.",
+                )
             )
 
-        if allocation >= 35:
+        if allocation > 35:
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": holding["ticker"],
-                    "alert_type": "concentration",
-                    "severity": "high",
-                    "title": "High single-stock concentration",
-                    "detail": f"{holding['ticker']} is {allocation:.1f}% of this portfolio.",
-                    "trigger_payload": {"allocation_pct": allocation, "threshold_pct": 35},
-                }
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "single_stock_exposure",
+                    "high",
+                    "High single-stock exposure",
+                    f"{holding['ticker']} is {allocation:.1f}% of this portfolio.",
+                    {"allocation_pct": allocation, "threshold_pct": 35},
+                    "Review position size and diversification. This app does not execute trades.",
+                )
             )
-        elif allocation >= 25:
+        elif allocation > 25:
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": holding["ticker"],
-                    "alert_type": "concentration",
-                    "severity": "medium",
-                    "title": "Single-stock concentration",
-                    "detail": f"{holding['ticker']} is above the 25% review threshold.",
-                    "trigger_payload": {"allocation_pct": allocation, "threshold_pct": 25},
-                }
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "single_stock_exposure",
+                    "medium",
+                    "Single-stock exposure",
+                    f"{holding['ticker']} is above the 25% portfolio review threshold.",
+                    {"allocation_pct": allocation, "threshold_pct": 25},
+                    "Review whether this exposure matches the portfolio risk profile.",
+                )
             )
 
-        if market_value and (unrealized_pl / market_value) <= -0.10:
+        if unrealized_pl_pct < -10:
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": holding["ticker"],
-                    "alert_type": "portfolio_risk",
-                    "severity": "medium",
-                    "title": "Unrealized loss threshold",
-                    "detail": f"{holding['ticker']} has an unrealized loss greater than 10% of current market value.",
-                    "trigger_payload": {"unrealized_pl_mad": unrealized_pl, "market_value_mad": market_value},
-                }
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "drawdown",
+                    "medium",
+                    "Holding drawdown",
+                    f"{holding['ticker']} is down {abs(unrealized_pl_pct):.1f}% versus average buy price.",
+                    {"unrealized_pl_pct": unrealized_pl_pct, "threshold_pct": -10},
+                    "Review the investment thesis and risk tolerance before making any manual decision.",
+                )
+            )
+
+        if unrealized_pl_pct > 20:
+            alerts.append(
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "large_unrealized_gain",
+                    "low",
+                    "Large unrealized gain",
+                    f"{holding['ticker']} is up {unrealized_pl_pct:.1f}% versus average buy price.",
+                    {"unrealized_pl_pct": unrealized_pl_pct, "threshold_pct": 20},
+                    "Review allocation and rebalance rules if this gain has changed portfolio concentration.",
+                )
+            )
+
+        if avg_daily_traded_value_mad and avg_daily_traded_value_mad < LOW_LIQUIDITY_TRADED_VALUE_MAD:
+            alerts.append(
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "low_liquidity",
+                    "high",
+                    "Low-liquidity holding",
+                    f"{holding['ticker']} has average daily traded value below {LOW_LIQUIDITY_TRADED_VALUE_MAD:,.0f} MAD.",
+                    {
+                        "avg_daily_traded_value_mad": avg_daily_traded_value_mad,
+                        "threshold_mad": LOW_LIQUIDITY_TRADED_VALUE_MAD,
+                    },
+                    "Use conservative sizing assumptions and verify liquidity before relying on analysis.",
+                )
+            )
+
+        if volatility_30d is not None and volatility_30d > HIGH_VOLATILITY_30D:
+            alerts.append(
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "high_volatility",
+                    "medium",
+                    "High-volatility holding",
+                    f"{holding['ticker']} has elevated 30-day volatility.",
+                    {"volatility_30d": volatility_30d, "threshold": HIGH_VOLATILITY_30D},
+                    "Review whether this holding fits the selected risk profile.",
+                )
             )
 
         signal = latest_signal_lookup(holding["ticker"])
         if signal and signal.signal == "SELL":
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": holding["ticker"],
-                    "alert_type": "signal",
-                    "severity": "high" if signal.confidence >= 70 else "medium",
-                    "title": "Research signal conflicts with holding",
-                    "detail": f"{holding['ticker']} currently has a SELL/AVOID research signal with {signal.confidence}% confidence.",
-                    "trigger_payload": {"signal": signal.signal, "confidence": signal.confidence},
-                }
+                _alert(
+                    portfolio,
+                    holding["ticker"],
+                    "signal_conflict",
+                    "high" if signal.confidence >= 70 else "medium",
+                    "Research signal conflicts with holding",
+                    f"{holding['ticker']} currently has a SELL/AVOID research signal with {signal.confidence}% confidence.",
+                    {"signal": signal.signal, "confidence": signal.confidence},
+                    "Review the research signal and underlying metrics. This is not a trade instruction.",
+                )
             )
 
     for sector, allocation in pnl.get("sector_allocations", {}).items():
-        if allocation >= 60:
+        if allocation > 60:
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": None,
-                    "alert_type": "concentration",
-                    "severity": "high",
-                    "title": "High sector concentration",
-                    "detail": f"{sector} is {allocation:.1f}% of this portfolio.",
-                    "trigger_payload": {"sector": sector, "allocation_pct": allocation, "threshold_pct": 60},
-                }
+                _alert(
+                    portfolio,
+                    None,
+                    "sector_exposure",
+                    "high",
+                    "High sector exposure",
+                    f"{sector} is {allocation:.1f}% of this portfolio.",
+                    {"sector": sector, "allocation_pct": allocation, "threshold_pct": 60},
+                    "Review diversification across sectors and keep any changes manual.",
+                )
             )
-        elif allocation >= 45:
+        elif allocation > 50:
             alerts.append(
-                {
-                    "user_id": portfolio.user_id,
-                    "portfolio_id": portfolio.id,
-                    "ticker": None,
-                    "alert_type": "concentration",
-                    "severity": "medium",
-                    "title": "Sector concentration",
-                    "detail": f"{sector} is above the 45% review threshold.",
-                    "trigger_payload": {"sector": sector, "allocation_pct": allocation, "threshold_pct": 45},
-                }
+                _alert(
+                    portfolio,
+                    None,
+                    "sector_exposure",
+                    "medium",
+                    "Sector exposure",
+                    f"{sector} is above the 50% portfolio review threshold.",
+                    {"sector": sector, "allocation_pct": allocation, "threshold_pct": 50},
+                    "Review whether sector concentration matches the portfolio objective.",
+                )
             )
 
     return alerts
+
+
+def to_portfolio_alert_output(alert: dict) -> dict:
+    severity_label = {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+    }.get(alert["severity"], alert["severity"].title())
+    return {
+        "alert_type": alert["alert_type"],
+        "severity": severity_label,
+        "symbol": alert.get("ticker"),
+        "message": alert["detail"],
+        "recommended_action": alert.get("trigger_payload", {}).get(
+            "recommended_action",
+            "Review this analytics alert before making any manual decision.",
+        ),
+    }
+
+
+def get_portfolio_risk_alerts(db: Session, portfolio_id: UUID) -> list[dict] | None:
+    portfolio = get_portfolio(db, portfolio_id)
+    if not portfolio:
+        return None
+    pnl = calculate_portfolio_pnl(db, portfolio.id)
+    if not pnl:
+        return []
+    alerts = build_portfolio_risk_alerts(portfolio, pnl, lambda ticker: _latest_signal(db, ticker))
+    return [to_portfolio_alert_output(alert) for alert in alerts]
 
 
 def generate_portfolio_alerts(db: Session, portfolio_id: UUID | None = None) -> list[RiskAlert]:

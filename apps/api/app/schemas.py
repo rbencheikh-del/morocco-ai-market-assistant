@@ -120,6 +120,7 @@ class SignalExplanationOut(ApiModel):
 
 
 class HoldingOut(ApiModel):
+    id: UUID | None = None
     ticker: str
     sector: str | None = None
     quantity: float
@@ -127,10 +128,20 @@ class HoldingOut(ApiModel):
     current_price_mad: float
     price_status: str = "unknown"
     price_as_of: datetime | None = None
+    avg_daily_traded_value_mad: float = 0
+    volatility_30d: float | None = None
     market_value_mad: float
     unrealized_pl_mad: float
+    unrealized_pl_pct: float = 0
     allocation_pct: float
     manual_note: str | None = None
+
+
+class CreatePortfolioRequest(ApiModel):
+    name: str = Field(min_length=1, max_length=120)
+    user_id: UUID | None = None
+    base_currency: str = Field(default="MAD", pattern="^MAD$")
+    risk_profile: str = Field(default="balanced", pattern="^(conservative|balanced|growth)$")
 
 
 class AddHoldingRequest(ApiModel):
@@ -139,6 +150,12 @@ class AddHoldingRequest(ApiModel):
     average_cost_mad: float = Field(ge=0)
     manual_note: str | None = None
     opened_at: date | None = None
+
+
+class UpdateHoldingRequest(ApiModel):
+    quantity: float = Field(gt=0)
+    average_cost_mad: float = Field(ge=0)
+    manual_note: str | None = None
 
 
 class PortfolioOut(ApiModel):
@@ -181,6 +198,14 @@ class RiskAlertGenerationRequest(ApiModel):
 class RiskAlertGenerationOut(ApiModel):
     generated: int
     alerts: list[RiskAlertOut]
+
+
+class PortfolioRiskAlertOut(ApiModel):
+    alert_type: str
+    severity: str = Field(pattern="^(Low|Medium|High)$")
+    symbol: str | None = None
+    message: str
+    recommended_action: str
 
 
 class WatchlistItemOut(ApiModel):

@@ -33,11 +33,26 @@ The risk alert engine is rules-based and explainable. It generates alerts for:
 
 - Single-stock concentration above 25%
 - High single-stock concentration above 35%
-- Sector concentration above 45%
+- Sector concentration above 50%
 - High sector concentration above 60%
-- Unrealized loss greater than 10% of current market value
+- Holding down more than 10% versus average buy price
+- Holding up more than 20% versus average buy price
+- Low-liquidity stocks held in the portfolio
+- High-volatility stocks held in the portfolio
 - Missing price data
 - Existing holdings with a SELL / AVOID research signal
+
+Portfolio endpoints:
+
+- `POST /portfolios`
+- `GET /portfolios/{id}`
+- `POST /portfolios/{id}/holdings`
+- `PUT /portfolios/{id}/holdings/{holding_id}`
+- `DELETE /portfolios/{id}/holdings/{holding_id}`
+- `GET /portfolios/{id}/summary`
+- `GET /portfolios/{id}/risk-alerts`
+
+Risk alerts are research-only and return `alert_type`, `severity`, `symbol`, `message`, and `recommended_action`. The app never places orders or executes trades.
 
 ## Run Locally
 
