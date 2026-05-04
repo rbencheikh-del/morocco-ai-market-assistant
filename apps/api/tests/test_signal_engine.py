@@ -1,4 +1,5 @@
 from app.ml.ranking_model import calculate_technical_indicators, rank_stock
+from app.ml.explanation_generator import generate_multilingual_explanation
 from app.ml.signal_model import generate_rules_based_signal
 
 
@@ -152,3 +153,28 @@ def test_technical_indicators_are_calculated_from_daily_prices():
     assert indicators["momentum_1m"] > 0
     assert indicators["momentum_3m"] > 0
     assert indicators["avg_daily_traded_value_mad"] > 0
+
+
+def test_multilingual_explanations_are_clear_actionable_and_not_advice():
+    explanation = generate_multilingual_explanation(
+        {
+            "signal": "BUY",
+            "confidence": 74,
+            "reasons": [
+                "price above 50-day moving average",
+                "strong 3-month momentum",
+                "liquidity acceptable",
+                "volatility medium",
+            ],
+            "risk_level": "medium",
+        }
+    )
+
+    assert "Research signal: Positive" in explanation["en"]
+    assert "Next step:" in explanation["en"]
+    assert "not financial advice" in explanation["en"]
+    assert "Signal de recherche" in explanation["fr"]
+    assert "Prochaine étape" in explanation["fr"]
+    assert "إشارة بحثية" in explanation["ar"]
+    assert "الخطوة التالية" in explanation["ar"]
+    assert "Ø" not in explanation["ar"]

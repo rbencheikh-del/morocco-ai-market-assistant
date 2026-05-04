@@ -22,37 +22,97 @@ class MultilingualExplanation(TypedDict):
 
 
 SIGNAL_LABELS = {
-    "BUY": {"en": "Buy", "fr": "Achat", "ar": "شراء"},
-    "HOLD": {"en": "Hold", "fr": "Conserver", "ar": "احتفاظ"},
-    "SELL": {"en": "Sell", "fr": "Vente", "ar": "بيع"},
+    "BUY": {"en": "Positive", "fr": "Positif", "ar": "إيجابية"},
+    "HOLD": {"en": "Neutral", "fr": "Neutre", "ar": "محايدة"},
+    "SELL": {"en": "Negative", "fr": "Négatif", "ar": "سلبية"},
 }
 
 RISK_LABELS = {
     "low": {"en": "low", "fr": "faible", "ar": "منخفض"},
-    "medium": {"en": "medium", "fr": "modere", "ar": "متوسط"},
-    "high": {"en": "high", "fr": "eleve", "ar": "مرتفع"},
+    "medium": {"en": "medium", "fr": "modéré", "ar": "متوسط"},
+    "high": {"en": "high", "fr": "élevé", "ar": "مرتفع"},
+}
+
+ACTION_BY_SIGNAL = {
+    "BUY": {
+        "en": "Review whether the trend, liquidity, and risk level still fit your research criteria before making any manual decision.",
+        "fr": "Vérifiez que la tendance, la liquidité et le niveau de risque correspondent toujours à vos critères de recherche avant toute décision manuelle.",
+        "ar": "راجع ما إذا كان الاتجاه والسيولة ومستوى المخاطر ما زالوا مناسبين لمعايير البحث الخاصة بك قبل أي قرار يدوي.",
+    },
+    "HOLD": {
+        "en": "Keep monitoring the next price update, liquidity, and signal drivers before changing your view.",
+        "fr": "Continuez à surveiller le prochain prix, la liquidité et les facteurs du signal avant de modifier votre analyse.",
+        "ar": "استمر في متابعة تحديث السعر القادم والسيولة والعوامل المؤثرة في الإشارة قبل تغيير تقييمك.",
+    },
+    "SELL": {
+        "en": "Review the risk drivers, data freshness, and position exposure; treat this as a caution flag, not an order.",
+        "fr": "Examinez les facteurs de risque, la fraîcheur des données et l'exposition; considérez ceci comme un signal de prudence, pas comme un ordre.",
+        "ar": "راجع عوامل المخاطر وحداثة البيانات وحجم التعرض؛ اعتبر ذلك تنبيهاً للحذر وليس أمراً بالتداول.",
+    },
+}
+
+FALLBACK_REASON = {
+    "en": "the available indicators are mixed",
+    "fr": "les indicateurs disponibles sont mitigés",
+    "ar": "المؤشرات المتاحة متباينة",
+}
+
+DISCLAIMER = {
+    "en": "This is market analytics only, not financial advice.",
+    "fr": "Il s'agit uniquement d'analyses de marché, pas d'un conseil financier.",
+    "ar": "هذه تحليلات سوقية فقط وليست نصيحة مالية.",
 }
 
 REASON_TRANSLATIONS = {
     "price above 50-day moving average": {
-        "en": "the price is above its 50-day moving average",
-        "fr": "le prix est au-dessus de sa moyenne mobile a 50 jours",
-        "ar": "السعر أعلى من المتوسط المتحرك لـ 50 يوما",
+        "en": "price is above the 50-day moving average",
+        "fr": "le prix est au-dessus de la moyenne mobile à 50 jours",
+        "ar": "السعر أعلى من المتوسط المتحرك لـ 50 يوماً",
     },
     "strong 3-month momentum": {
         "en": "3-month momentum is strong",
-        "fr": "la dynamique sur 3 mois est forte",
-        "ar": "الزخم خلال 3 أشهر قوي",
+        "fr": "la dynamique sur 3 mois est solide",
+        "ar": "زخم 3 أشهر قوي",
     },
     "liquidity acceptable": {
-        "en": "liquidity appears acceptable",
-        "fr": "la liquidite semble acceptable",
-        "ar": "تبدو السيولة مقبولة",
+        "en": "liquidity looks acceptable",
+        "fr": "la liquidité semble acceptable",
+        "ar": "السيولة تبدو مقبولة",
     },
     "volatility medium": {
-        "en": "volatility is medium",
-        "fr": "la volatilite est moyenne",
+        "en": "volatility is moderate",
+        "fr": "la volatilité est modérée",
         "ar": "التقلبات متوسطة",
+    },
+    "the 20-day moving average is above the 50-day moving average": {
+        "en": "the short-term trend is above the medium-term trend",
+        "fr": "la tendance courte est au-dessus de la tendance moyenne",
+        "ar": "الاتجاه قصير الأجل أعلى من الاتجاه متوسط الأجل",
+    },
+    "3-month momentum confirms a stronger trend": {
+        "en": "3-month momentum supports the trend",
+        "fr": "la dynamique sur 3 mois soutient la tendance",
+        "ar": "زخم 3 أشهر يدعم الاتجاه",
+    },
+    "average daily traded value suggests healthy liquidity": {
+        "en": "daily traded value suggests healthy liquidity",
+        "fr": "la valeur échangée quotidienne suggère une liquidité saine",
+        "ar": "قيمة التداول اليومية تشير إلى سيولة جيدة",
+    },
+    "30-day volatility is contained": {
+        "en": "30-day volatility is contained",
+        "fr": "la volatilité à 30 jours reste contenue",
+        "ar": "تقلب 30 يوماً لا يزال محدوداً",
+    },
+    "average daily traded value is low for retail execution quality": {
+        "en": "liquidity is low, which can make real-world execution harder",
+        "fr": "la liquidité est faible, ce qui peut rendre l'exécution réelle plus difficile",
+        "ar": "السيولة منخفضة، ما قد يجعل التنفيذ الفعلي أصعب",
+    },
+    "30-day volatility is elevated": {
+        "en": "30-day volatility is elevated",
+        "fr": "la volatilité à 30 jours est élevée",
+        "ar": "تقلب 30 يوماً مرتفع",
     },
 }
 
@@ -63,20 +123,16 @@ def generate_multilingual_explanation(payload: SignalExplanationInput) -> Multil
     reasons = [reason.strip() for reason in payload["reasons"] if reason.strip()]
     risk_level = payload.get("risk_level") or _infer_risk_level(reasons)
 
-    en_reasons = _translated_reasons(reasons, "en")
-    fr_reasons = _translated_reasons(reasons, "fr")
-    ar_reasons = _translated_reasons(reasons, "ar")
-
     return {
-        "en": _english(signal, confidence, risk_level, en_reasons),
-        "fr": _french(signal, confidence, risk_level, fr_reasons),
-        "ar": _arabic(signal, confidence, risk_level, ar_reasons),
+        "en": _compose("en", signal, confidence, risk_level, reasons),
+        "fr": _compose("fr", signal, confidence, risk_level, reasons),
+        "ar": _compose("ar", signal, confidence, risk_level, reasons),
     }
 
 
 def _infer_risk_level(reasons: list[str]) -> RiskLevel:
     joined = " ".join(reason.lower() for reason in reasons)
-    if "high" in joined or "elevated" in joined or "low liquidity" in joined:
+    if "high" in joined or "elevated" in joined or "low liquidity" in joined or "faible" in joined:
         return "high"
     if "medium" in joined or "moderate" in joined or "volatility" in joined:
         return "medium"
@@ -93,11 +149,7 @@ def _translated_reasons(reasons: list[str], language: LanguageCode) -> list[str]
 
 def _join_reasons(reasons: list[str], language: LanguageCode) -> str:
     if not reasons:
-        return {
-            "en": "the available indicators are mixed",
-            "fr": "les indicateurs disponibles sont mixtes",
-            "ar": "المؤشرات المتاحة متباينة",
-        }[language]
+        return FALLBACK_REASON[language]
     if len(reasons) == 1:
         return reasons[0]
     connector = {"en": ", and ", "fr": ", et ", "ar": "، و"}[language]
@@ -105,22 +157,26 @@ def _join_reasons(reasons: list[str], language: LanguageCode) -> str:
     return separator.join(reasons[:-1]) + connector + reasons[-1]
 
 
-def _english(signal: str, confidence: int, risk_level: RiskLevel, reasons: list[str]) -> str:
-    label = SIGNAL_LABELS[signal]["en"]
-    risk = RISK_LABELS[risk_level]["en"]
-    details = _join_reasons(reasons, "en")
-    return f"{label} signal with {confidence}% confidence. The setup looks {risk} risk because {details}. This is research support only, not financial advice."
+def _compose(language: LanguageCode, signal: str, confidence: int, risk_level: RiskLevel, reasons: list[str]) -> str:
+    label = SIGNAL_LABELS[signal][language]
+    risk = RISK_LABELS[risk_level][language]
+    reason_text = _join_reasons(_translated_reasons(reasons, language), language)
+    action = ACTION_BY_SIGNAL[signal][language]
 
-
-def _french(signal: str, confidence: int, risk_level: RiskLevel, reasons: list[str]) -> str:
-    label = SIGNAL_LABELS[signal]["fr"]
-    risk = RISK_LABELS[risk_level]["fr"]
-    details = _join_reasons(reasons, "fr")
-    return f"Signal {label} avec {confidence}% de confiance. Le profil de risque est {risk} car {details}. Ceci est une aide a la recherche, pas un conseil financier."
-
-
-def _arabic(signal: str, confidence: int, risk_level: RiskLevel, reasons: list[str]) -> str:
-    label = SIGNAL_LABELS[signal]["ar"]
-    risk = RISK_LABELS[risk_level]["ar"]
-    details = _join_reasons(reasons, "ar")
-    return f"إشارة {label} بثقة {confidence}%. مستوى المخاطر {risk} لأن {details}. هذا دعم بحثي فقط وليس نصيحة مالية."
+    if language == "en":
+        return (
+            f"Research signal: {label} with {confidence}% confidence. "
+            f"Why: {reason_text}. Risk level: {risk}. "
+            f"Next step: {action} {DISCLAIMER[language]}"
+        )
+    if language == "fr":
+        return (
+            f"Signal de recherche : {label} avec {confidence}% de confiance. "
+            f"Pourquoi : {reason_text}. Niveau de risque : {risk}. "
+            f"Prochaine étape : {action} {DISCLAIMER[language]}"
+        )
+    return (
+        f"إشارة بحثية: {label} بدرجة ثقة {confidence}%. "
+        f"السبب: {reason_text}. مستوى المخاطر: {risk}. "
+        f"الخطوة التالية: {action} {DISCLAIMER[language]}"
+    )
