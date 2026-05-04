@@ -51,6 +51,21 @@ CREATE TABLE IF NOT EXISTS daily_ohlcv_prices (
   CHECK (low_mad <= open_mad AND low_mad <= close_mad)
 );
 
+CREATE TABLE IF NOT EXISTS market_data_import_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  source_name TEXT NOT NULL DEFAULT 'csv_upload',
+  status TEXT NOT NULL CHECK (status IN ('success', 'partial_success', 'failed')),
+  rows_received INTEGER NOT NULL DEFAULT 0,
+  rows_inserted INTEGER NOT NULL DEFAULT 0,
+  rows_rejected INTEGER NOT NULL DEFAULT 0,
+  rows_duplicate INTEGER NOT NULL DEFAULT 0,
+  warning_count INTEGER NOT NULL DEFAULT 0,
+  error_message TEXT,
+  import_summary JSONB NOT NULL DEFAULT '{}'::jsonb,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS market_snapshots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   ticker TEXT NOT NULL REFERENCES securities(ticker) ON UPDATE CASCADE,
@@ -163,11 +178,29 @@ CREATE TABLE IF NOT EXISTS risk_alerts (
   portfolio_id UUID REFERENCES manual_portfolios(id) ON DELETE CASCADE,
   watchlist_id UUID REFERENCES watchlists(id) ON DELETE CASCADE,
   ticker TEXT REFERENCES securities(ticker) ON UPDATE CASCADE,
-  alert_type TEXT NOT NULL CHECK (alert_type IN ('price', 'signal', 'portfolio_risk', 'concentration', 'volatility', 'data_quality')),
+  alert_type TEXT NOT NULL CHECK (alert_type IN (
+    'price',
+    'signal',
+    'portfolio_risk',
+    'concentration',
+    'volatility',
+    'data_quality',
+    'price_above_threshold',
+    'price_below_threshold',
+    'missing_market_price',
+    'signal_watch',
+    'signal_change',
+    'daily_price_move',
+    'ranking_threshold',
+    'risk_level_increase',
+    'low_liquidity',
+    'high_volatility'
+  )),
   severity TEXT NOT NULL CHECK (severity IN ('low', 'medium', 'high')),
   title TEXT NOT NULL,
   detail TEXT NOT NULL,
   trigger_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
   is_resolved BOOLEAN NOT NULL DEFAULT FALSE,
   resolved_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -191,6 +224,7 @@ CREATE TABLE IF NOT EXISTS model_audit_logs (
 CREATE INDEX IF NOT EXISTS idx_securities_exchange_sector ON securities(exchange_code, sector, is_active);
 CREATE INDEX IF NOT EXISTS idx_daily_ohlcv_ticker_date ON daily_ohlcv_prices(ticker, price_date DESC);
 CREATE INDEX IF NOT EXISTS idx_daily_ohlcv_security_date ON daily_ohlcv_prices(security_id, price_date DESC);
+CREATE INDEX IF NOT EXISTS idx_import_logs_started ON market_data_import_logs(started_at DESC);
 CREATE INDEX IF NOT EXISTS idx_market_snapshots_ticker_as_of ON market_snapshots(ticker, as_of DESC);
 CREATE INDEX IF NOT EXISTS idx_rankings_rank_date ON stock_rankings(rank_date, rank_position);
 CREATE INDEX IF NOT EXISTS idx_rankings_ticker_date ON stock_rankings(ticker, rank_date DESC);
@@ -202,4 +236,5 @@ CREATE INDEX IF NOT EXISTS idx_watchlists_user ON watchlists(user_id, is_default
 CREATE INDEX IF NOT EXISTS idx_watchlist_items_watchlist ON watchlist_items(watchlist_id, ticker);
 CREATE INDEX IF NOT EXISTS idx_alerts_user_created ON risk_alerts(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_alerts_portfolio ON risk_alerts(portfolio_id, severity);
+CREATE INDEX IF NOT EXISTS idx_alerts_unread ON risk_alerts(user_id, is_read, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_user_created ON model_audit_logs(user_id, created_at DESC);

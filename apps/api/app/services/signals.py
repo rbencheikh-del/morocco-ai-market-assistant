@@ -9,6 +9,15 @@ def list_signals(db: Session) -> list[StockSignal]:
     return db.query(StockSignal).order_by(StockSignal.signal_date.desc(), StockSignal.ticker.asc()).all()
 
 
+def get_latest_signal(db: Session, ticker: str) -> StockSignal | None:
+    return (
+        db.query(StockSignal)
+        .filter(StockSignal.ticker == ticker.upper())
+        .order_by(StockSignal.signal_date.desc())
+        .first()
+    )
+
+
 def generate_signal(features: dict) -> dict:
     signal, confidence = classify_signal(features)
     rules_result = generate_rules_based_signal(
@@ -27,7 +36,7 @@ def generate_signal(features: dict) -> dict:
         "confidence": confidence,
         "reason": rules_result["explanation"],
         "risk_note": f"Risk level: {rules_result['risk_level']}. Signals are research support only; no trade execution is available.",
-        "model_version": "rules-cse-v1",
+        "model_version": "rules-cse-v2",
     }
 
 
@@ -45,7 +54,7 @@ def generate_rules_signal(features: dict) -> dict:
     )
     return {
         **result,
-        "model_version": "rules-cse-v1",
+        "model_version": "rules-cse-v2",
     }
 
 

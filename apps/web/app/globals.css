@@ -118,6 +118,12 @@ input {
   padding: 32px;
 }
 
+.detailShell {
+  display: grid;
+  gap: 24px;
+  padding: 32px;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -159,6 +165,32 @@ input {
   line-height: 1.7;
 }
 
+.detailHero {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.35fr);
+}
+
+.detailQuote {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid #bdd6fb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.detailQuote span,
+.detailQuote small,
+.detailList span,
+.indicatorGrid span,
+.metricStrip span {
+  color: var(--muted);
+}
+
+.detailQuote strong {
+  font-size: 2rem;
+}
+
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -198,6 +230,12 @@ input {
 
 .grid.two {
   grid-template-columns: minmax(0, 1.4fr) minmax(340px, 0.8fr);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 24px;
 }
 
 .panel {
@@ -298,6 +336,10 @@ input {
   color: var(--muted);
 }
 
+.stockLink {
+  color: var(--blue);
+}
+
 .signalStack,
 .holdingList,
 .alertList {
@@ -389,6 +431,42 @@ meter {
   align-items: center;
 }
 
+.allocationGrid,
+.indicatorGrid,
+.metricStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.allocationGrid section,
+.indicatorGrid section,
+.metricStrip section {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.allocationGrid meter {
+  width: 100%;
+}
+
+.detailList {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.leadText,
+.riskList {
+  line-height: 1.6;
+}
+
 .positive {
   color: var(--green);
   font-weight: 800;
@@ -431,6 +509,145 @@ meter {
 .alertItem p {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.alertItem small {
+  color: #33445c;
+  line-height: 1.5;
+}
+
+.disclaimerPanel {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid #bdd6fb;
+  border-radius: 8px;
+  background: #f4f9ff;
+  color: #1557bd;
+}
+
+.alertBellPanel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(280px, 0.9fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 12px 36px rgba(22, 37, 61, 0.06);
+}
+
+.bellIcon {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--blue);
+}
+
+.bellIcon span {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.alertBellPanel small,
+.miniAlertList span {
+  color: var(--muted);
+}
+
+.miniAlertList {
+  display: grid;
+  gap: 8px;
+}
+
+.miniAlertList section {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.miniAlertList p {
+  margin: 4px 0 0;
+}
+
+.marketBriefPanel h3 {
+  margin: 0 0 12px;
+}
+
+.briefGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(320px, 1fr);
+  gap: 18px;
+}
+
+.briefList,
+.warningList {
+  display: grid;
+  gap: 10px;
+}
+
+.briefList div {
+  display: grid;
+  grid-template-columns: 56px 76px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.briefList small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.warningList p {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #f1d3d3;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #5a2630;
+  line-height: 1.5;
+}
+
+.narrativeSummary {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.narrativeSummary p {
+  margin: 8px 0 0;
+  color: #33445c;
+  line-height: 1.6;
+}
+
+.backLink {
+  width: fit-content;
+  color: var(--blue);
+  font-weight: 800;
 }
 
 .askForm {
@@ -503,7 +720,11 @@ meter {
 @media (max-width: 980px) {
   .appShell,
   .hero,
+  .detailHero,
   .grid.two,
+  .detailGrid,
+  .alertBellPanel,
+  .briefGrid,
   .summaryGrid {
     grid-template-columns: 1fr;
   }
@@ -533,7 +754,11 @@ meter {
 
   .sidebar nav,
   .askForm div,
-  .holdingRow {
+  .holdingRow,
+  .allocationGrid,
+  .indicatorGrid,
+  .metricStrip,
+  .detailList {
     grid-template-columns: 1fr;
   }
 

@@ -13,6 +13,10 @@ export type RankedStock = {
   confidence: number;
   reason: string;
   risk_note: string;
+  latest_price_mad?: number;
+  daily_change_pct?: number;
+  momentum_1m?: number;
+  momentum_3m?: number;
 };
 
 export type Signal = {
@@ -31,32 +35,90 @@ export type MarketSnapshot = {
   price_mad: number;
   volume: number;
   momentum_90d?: number;
+  volatility_30d?: number;
 };
 
-export type Portfolio = {
-  id: string;
-  name: string;
+export type PortfolioHolding = {
+  ticker: string;
+  sector?: string;
+  quantity: number;
+  average_cost_mad: number;
+  current_price_mad: number;
+  market_value_mad: number;
+  unrealized_pl_mad: number;
+  unrealized_pl_pct?: number;
+  allocation_pct: number;
+  manual_note?: string;
+};
+
+export type PortfolioSummary = {
+  portfolio_id: string;
+  portfolio_name: string;
   base_currency: string;
-  total_value_mad: number;
-  holdings: Array<{
-    ticker: string;
-    quantity: number;
-    average_cost_mad: number;
-    current_price_mad: number;
-    market_value_mad: number;
-    unrealized_pl_mad: number;
-    allocation_pct: number;
-    manual_note?: string;
-  }>;
+  cost_basis_mad: number;
+  current_value_mad: number;
+  unrealized_pl_mad: number;
+  unrealized_pl_pct: number;
+  sector_allocations: Record<string, number>;
+  data_quality_warnings: string[];
+  holdings: PortfolioHolding[];
 };
 
 export type RiskAlert = {
-  id: string;
-  severity: "low" | "medium" | "high";
-  title: string;
-  detail: string;
+  id?: string;
+  severity: "low" | "medium" | "high" | "Low" | "Medium" | "High";
+  alert_type?: string;
+  title?: string;
+  detail?: string;
   ticker?: string;
-  created_at: string;
+  symbol?: string;
+  message?: string;
+  recommended_action?: string;
+  created_at?: string;
+  is_read?: boolean;
+};
+
+export type WatchlistStock = {
+  id?: string;
+  ticker: string;
+  user_note?: string;
+  alert_above_mad?: number;
+  alert_below_mad?: number;
+  latest_price_mad?: number;
+  signal?: "BUY" | "HOLD" | "SELL";
+  ranking_score?: number;
+  daily_change_pct?: number;
+  risk_level?: string;
+};
+
+export type Watchlist = {
+  id: string;
+  name: string;
+  description?: string;
+  is_default: boolean;
+  items: WatchlistStock[];
+};
+
+export type StockDetail = {
+  ticker: string;
+  name: string;
+  sector: string;
+  latest_price_mad?: number;
+  latest_price_as_of?: string;
+  latest_close_mad?: number;
+  latest_close_date?: string;
+  ai_score?: number;
+  rank_position?: number;
+  signal?: "BUY" | "HOLD" | "SELL";
+  confidence?: number;
+  risk_note?: string;
+};
+
+export type StockDetailData = {
+  stock: StockDetail;
+  ranking?: RankedStock;
+  signal?: Signal;
+  snapshot?: MarketSnapshot;
 };
 
 export type AskResponse = {
@@ -71,6 +133,8 @@ export type DashboardData = {
   rankings: RankedStock[];
   signals: Signal[];
   snapshots: MarketSnapshot[];
-  portfolio: Portfolio;
+  portfolio: PortfolioSummary;
   alerts: RiskAlert[];
+  unreadAlerts: RiskAlert[];
+  watchlists: Watchlist[];
 };

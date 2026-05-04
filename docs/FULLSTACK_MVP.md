@@ -40,6 +40,10 @@ It deliberately excludes broker accounts, orders, executions, deposits, withdraw
 
 The MVP uses deterministic scoring and signal services for explainability. The `apps/api/app/ml/training.py` module sketches the future XGBoost training path once licensed historical data and labeled outcomes are available.
 
+## Portfolio And Risk Boundary
+
+Portfolio tracking is manual and MAD-denominated. The API calculates holdings, cost basis, unrealized P&L, allocation percentages, sector exposure, and data-quality warnings. Risk alerts are generated from transparent rules for concentration, sector exposure, missing price data, unrealized losses, and SELL / AVOID research-signal conflicts.
+
 ## Compliance Boundary
 
 Every user-facing signal is framed as research support. The assistant writes audit logs, the dashboard repeats that no trade execution exists, and the architecture avoids anything that could be mistaken for broker functionality.

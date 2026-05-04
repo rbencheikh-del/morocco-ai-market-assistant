@@ -11,18 +11,11 @@ declare module "lucide-react" {
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
 
-  export const Activity: LucideIcon;
-  export const AlertTriangle: LucideIcon;
-  export const BarChart3: LucideIcon;
   export const Bell: LucideIcon;
-  export const Bot: LucideIcon;
-  export const BrainCircuit: LucideIcon;
-  export const Building2: LucideIcon;
-  export const Eye: LucideIcon;
   export const LineChart: LucideIcon;
-  export const SendHorizonal: LucideIcon;
+  export const RefreshCw: LucideIcon;
+  export const Search: LucideIcon;
+  export const Send: LucideIcon;
   export const ShieldCheck: LucideIcon;
-  export const Sparkles: LucideIcon;
-  export const TrendingUp: LucideIcon;
-  export const WalletCards: LucideIcon;
+  export const SlidersHorizontal: LucideIcon;
 }
