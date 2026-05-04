@@ -25,6 +25,20 @@ The MVP intentionally has no trade execution. It is a research, education, and p
 - Stock Q&A assistant with audit logging
 - No trade execution, broker orders, deposits, withdrawals, or custody flows
 
+## Portfolio and Risk Logic
+
+The portfolio tracker values manually entered holdings in MAD, calculates cost basis and unrealized P&L, and reports allocation by holding and sector. If a latest market price is unavailable, the API marks the holding with `price_status: missing`, uses average cost only as a safe display fallback, and returns a data-quality warning.
+
+The risk alert engine is rules-based and explainable. It generates alerts for:
+
+- Single-stock concentration above 25%
+- High single-stock concentration above 35%
+- Sector concentration above 45%
+- High sector concentration above 60%
+- Unrealized loss greater than 10% of current market value
+- Missing price data
+- Existing holdings with a SELL / AVOID research signal
+
 ## Run Locally
 
 1. Copy environment values:

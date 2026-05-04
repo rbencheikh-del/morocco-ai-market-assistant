@@ -78,3 +78,62 @@ def test_missing_price_data_fails_safely_with_average_cost_fallback():
     fallback_price = portfolio_service._latest_price(NoSnapshotDb(), "ATW", fallback=462.0)
 
     assert fallback_price == 462.0
+
+
+def test_missing_price_data_generates_data_quality_alert():
+    portfolio = SimpleNamespace(id=uuid4(), user_id=uuid4())
+    pnl = {
+        "sector_allocations": {},
+        "holdings": [
+            {
+                "ticker": "ATW",
+                "allocation_pct": 10.0,
+                "unrealized_pl_mad": 0.0,
+                "market_value_mad": 10_000.0,
+                "price_status": "missing",
+            }
+        ],
+    }
+
+    alerts = risk_service.build_portfolio_risk_alerts(portfolio, pnl, lambda _ticker: None)
+
+    assert alerts[0]["alert_type"] == "data_quality"
+    assert alerts[0]["severity"] == "medium"
+    assert "average cost" in alerts[0]["detail"]
+
+
+def test_sector_concentration_generates_alert():
+    portfolio = SimpleNamespace(id=uuid4(), user_id=uuid4())
+    pnl = {
+        "sector_allocations": {"Banking": 52.0},
+        "holdings": [],
+    }
+
+    alerts = risk_service.build_portfolio_risk_alerts(portfolio, pnl, lambda _ticker: None)
+
+    assert alerts[0]["alert_type"] == "concentration"
+    assert alerts[0]["severity"] == "medium"
+    assert "Banking" in alerts[0]["detail"]
+
+
+def test_sell_signal_conflict_generates_alert():
+    portfolio = SimpleNamespace(id=uuid4(), user_id=uuid4())
+    sell_signal = SimpleNamespace(signal="SELL", confidence=74)
+    pnl = {
+        "sector_allocations": {},
+        "holdings": [
+            {
+                "ticker": "LHM",
+                "allocation_pct": 12.0,
+                "unrealized_pl_mad": 0.0,
+                "market_value_mad": 12_000.0,
+                "price_status": "live",
+            }
+        ],
+    }
+
+    alerts = risk_service.build_portfolio_risk_alerts(portfolio, pnl, lambda _ticker: sell_signal)
+
+    assert alerts[0]["alert_type"] == "signal"
+    assert alerts[0]["severity"] == "high"
+    assert "SELL/AVOID" in alerts[0]["detail"]

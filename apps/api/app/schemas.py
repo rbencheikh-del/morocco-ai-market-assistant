@@ -121,9 +121,12 @@ class SignalExplanationOut(ApiModel):
 
 class HoldingOut(ApiModel):
     ticker: str
+    sector: str | None = None
     quantity: float
     average_cost_mad: float
     current_price_mad: float
+    price_status: str = "unknown"
+    price_as_of: datetime | None = None
     market_value_mad: float
     unrealized_pl_mad: float
     allocation_pct: float
@@ -143,6 +146,8 @@ class PortfolioOut(ApiModel):
     name: str
     base_currency: str
     total_value_mad: float
+    sector_allocations: dict[str, float] = Field(default_factory=dict)
+    data_quality_warnings: list[str] = Field(default_factory=list)
     holdings: list[HoldingOut]
 
 
@@ -154,6 +159,8 @@ class PortfolioPnlOut(ApiModel):
     current_value_mad: float
     unrealized_pl_mad: float
     unrealized_pl_pct: float
+    sector_allocations: dict[str, float] = Field(default_factory=dict)
+    data_quality_warnings: list[str] = Field(default_factory=list)
     holdings: list[HoldingOut]
 
 
