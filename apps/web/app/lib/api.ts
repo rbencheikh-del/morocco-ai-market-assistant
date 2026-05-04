@@ -37,6 +37,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       return {
         ...stock,
         latest_price_mad: snapshot?.price_mad,
+        daily_change_pct: stock.daily_change_pct,
         momentum_1m: stock.momentum_1m ?? (stock.momentum_score - 50) / 1_000,
         momentum_3m: snapshot?.momentum_90d ?? stock.momentum_3m,
       };

@@ -586,6 +586,64 @@ meter {
   margin: 4px 0 0;
 }
 
+.marketBriefPanel h3 {
+  margin: 0 0 12px;
+}
+
+.briefGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(320px, 1fr);
+  gap: 18px;
+}
+
+.briefList,
+.warningList {
+  display: grid;
+  gap: 10px;
+}
+
+.briefList div {
+  display: grid;
+  grid-template-columns: 56px 76px auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.briefList small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.warningList p {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #f1d3d3;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #5a2630;
+  line-height: 1.5;
+}
+
+.narrativeSummary {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.narrativeSummary p {
+  margin: 8px 0 0;
+  color: #33445c;
+  line-height: 1.6;
+}
+
 .backLink {
   width: fit-content;
   color: var(--blue);
@@ -666,6 +724,7 @@ meter {
   .grid.two,
   .detailGrid,
   .alertBellPanel,
+  .briefGrid,
   .summaryGrid {
     grid-template-columns: 1fr;
   }

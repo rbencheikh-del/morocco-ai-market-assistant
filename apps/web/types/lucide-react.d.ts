@@ -23,5 +23,6 @@ declare module "lucide-react" {
   export const SendHorizonal: LucideIcon;
   export const ShieldCheck: LucideIcon;
   export const Sparkles: LucideIcon;
+  export const TrendingUp: LucideIcon;
   export const WalletCards: LucideIcon;
 }

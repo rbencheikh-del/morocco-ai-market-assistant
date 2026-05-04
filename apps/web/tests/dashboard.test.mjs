@@ -38,6 +38,17 @@ test("rankings display price, momentum, and signal badges", () => {
   assert.match(signalBadge, /SELL/);
 });
 
+test("market brief displays top stocks movers warnings and narrative", () => {
+  const brief = read("apps/web/app/components/MarketBrief.tsx");
+  const page = read("apps/web/app/page.tsx");
+
+  assert.match(brief, /Top 5 Moroccan stocks today/);
+  assert.match(brief, /Biggest movers/);
+  assert.match(brief, /Risk warnings/);
+  assert.match(brief, /Simple narrative summary/);
+  assert.match(page, /MarketBrief/);
+});
+
 test("portfolio summary displays value, unrealized P&L, and allocation", () => {
   const portfolio = read("apps/web/app/components/PortfolioTracker.tsx");
 

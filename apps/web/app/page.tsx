@@ -2,6 +2,7 @@ import { AssistantPanel } from "./components/AssistantPanel";
 import { AlertBellPanel } from "./components/AlertBellPanel";
 import { DashboardSummary } from "./components/DashboardSummary";
 import { MarketChart } from "./components/MarketChart";
+import { MarketBrief } from "./components/MarketBrief";
 import { PortfolioTracker } from "./components/PortfolioTracker";
 import { RankedStocksTable } from "./components/RankedStocksTable";
 import { RiskAlerts } from "./components/RiskAlerts";
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
         </div>
         <nav>
           <a href="#rankings">Rankings</a>
+          <a href="#brief">Market brief</a>
           <a href="#signals">Signals</a>
           <a href="#portfolio">Portfolio</a>
           <a href="#watchlists">Watchlists</a>
@@ -56,6 +58,10 @@ export default async function DashboardPage() {
         </section>
 
         <DashboardSummary data={data} />
+
+        <section id="brief">
+          <MarketBrief data={data} />
+        </section>
 
         <section id="rankings">
           <RankedStocksTable rankings={data.rankings} />

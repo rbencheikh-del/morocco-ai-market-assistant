@@ -14,6 +14,7 @@ export type RankedStock = {
   reason: string;
   risk_note: string;
   latest_price_mad?: number;
+  daily_change_pct?: number;
   momentum_1m?: number;
   momentum_3m?: number;
 };
